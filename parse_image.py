@@ -29,8 +29,13 @@ def sudoku_master(img):
 
         # The higher the threshold, the more we can approximate?
         # requires the NN to get at least a 'threshold' confidence % to consider the number as correct
+        # NUMBER READING THRESHOLD
         sudoku.guess_sudoku(confidence_threshold=0.7)
 
+        # If we read a sudoku that is 80%, 90%
+        # or whatever % similar to another one we already did, we assume it's that one.
+        # (it has some autocorrecting but not perfect [depends on font and neural network])
+        # APPROXIMATION (modify or set it to False)
         sudoku.solve(img_cropped_sudoku, approximate=80)
         if img_cropped_sudoku is None:
             print('asdoasodads!!')
