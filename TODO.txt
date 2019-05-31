@@ -1,3 +1,5 @@
+Edit number font and positioning (in some positions they get weird and go to the corner of their cases)
+
 Numbers seem a little blurry, parts of them get whitened (maybe problem with masking when pasting the sudoku into the image?)
 
 Not perfect: can confuse some numbers depending on the font (adjust number reading threshold and sudoku approximation [or don't use it if there's issues])
