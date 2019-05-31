@@ -1,18 +1,19 @@
 from __future__ import print_function
 import sys
 import cv2
+
 from neural_network import NeuralNetwork
 from parse_image import sudoku_master
 
-#capture from camera at location 0
+
+# Capture from camera 0
 cap = cv2.VideoCapture(0)
 cv2.startWindowThread()
-# load neural network
+# Load neural network
 NeuralNetwork.instance()
 
 while True:
-    # print('hey')
-    r, img = cap.read()
+    _, img = cap.read()
 
     # Processes the image and outputs the image with the solved sudoku
     output = sudoku_master(img)
@@ -30,4 +31,3 @@ cv2.waitKey(1)
 cv2.waitKey(1)
 cv2.VideoCapture(0).release()
 cv2.waitKey(1)
-cv2.imshow('nothing',output)
