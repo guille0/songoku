@@ -15,7 +15,6 @@ class NeuralNetwork:
 
         self.model = model_from_json(model_json)
         self.model.load_weights('258epochs_model_7.h5')
-        self.labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
         print('Neural Network loaded!')
 

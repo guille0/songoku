@@ -10,6 +10,8 @@
 3 8 6 9 7 4 1 5 2
 '''
 
-ignore = [(1,2), (2,3)]
-if (1,3) in ignore:
-    print('hey')
+
+ignore = [0]
+
+if ignore:
+    print('a')

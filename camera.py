@@ -1,5 +1,4 @@
 from __future__ import print_function
-import sys
 import cv2
 
 from neural_network import NeuralNetwork
@@ -9,6 +8,7 @@ from parse_image import sudoku_master
 # Capture from camera 0
 cap = cv2.VideoCapture(0)
 cv2.startWindowThread()
+
 # Load neural network
 NeuralNetwork.instance()
 

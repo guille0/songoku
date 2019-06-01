@@ -1,14 +1,15 @@
-import cv2
+from numpy_ringbuffer import RingBuffer
 import numpy as np
+import cv2
 
 
 def crop_from_points(img, corners, make_square=True):
 
     cnt = np.array([
-            corners[0],
-            corners[1],
-            corners[2],
-            corners[3]
+        corners[0],
+        corners[1],
+        corners[2],
+        corners[3]
         ])
 
     rect = cv2.minAreaRect(cnt)
@@ -173,4 +174,3 @@ class Singleton:
 
     def __instancecheck__(self, inst):
         return isinstance(inst, self._decorated)
-
