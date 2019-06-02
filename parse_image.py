@@ -12,7 +12,7 @@ import sudoku_solving
 def sudoku_master(img_original):
     # Tries to find the part of the image with the sudoku
     ## corners are top left, top right, bottom left, bottom right
-    _, corners = find_sudoku(img_original, test=False)
+    _, corners = find_sudoku(img_original, draw_contours=False ,test=False)
 
     # If we got a sudoku image
     if corners is not None:
@@ -25,12 +25,12 @@ def sudoku_master(img_original):
         transformation_matrix = np.linalg.pinv(transformation_matrix)
 
         # We crop out each number from the sudoku and create a Sudoku instance
-        sudoku = build_sudoku(img_cropped_sudoku, test=False)
+        sudoku = build_sudoku(img_cropped_sudoku, test=True)
 
         # We pass the image of each case in the sudoku to a neural network to read
         ## NOTE: NUMBER READING THRESHOLD
         ## Minimum confidence the neural network needs to have about its guess (from 0 to 1)
-        sudoku.guess_sudoku(confidence_threshold=0.7)
+        sudoku.guess_sudoku(confidence_threshold=0)
 
         # Now that we have processed the sudoku, we can solve it with a normal sudoku algorithm
         # Also writes the results into the cropped sudoku
@@ -39,7 +39,8 @@ def sudoku_master(img_original):
         ## we assume it's the same one and we just couldn't see all the numbers
         ## (it has some autocorrecting but not perfect [depends on font and neural network])
         ## (it tries prioritize sudokus that actually make sense)
-        sudoku.solve(img_cropped_sudoku, approximate=90)
+        sudoku.solve(img_cropped_sudoku, approximate=50)
+        # sudoku.write_test(img_cropped_sudoku)
 
         # We paste the cropped sudoku which is now solved into the camera image
         img_sudoku_final = perspective_transform(img_cropped_sudoku, transformation_matrix, original_shape)
@@ -150,19 +151,31 @@ def build_sudoku(sudoku_image, test=False):
     sudoku = Sudoku.instance()
 
     # NOTE Change border for different kinds of sudoku (bigger/smaller numbers, thick lines...)
-    # normal = 4
+    # TODO find a way to find this automatically?
+    # The borders of the whole puzzle (4?)
+    sudoku_border = 4
+    # The lines inbetween the cases (2? 4?)
     border = 4
+    x = w/9
+    y = h/9
 
     for i in range(9):
         for j in range(9):
             # We get the position of each case (simply dividing the image in 9)
-            x = w/9
-            y = h/9
+
 
             top     = int(round(y*i+border))
             left    = int(round(x*j+border))
             right   = int(round(x*(j+1)-border))
             bottom  = int(round(y*(i+1)-border))
+            if i == 0:
+                top+=sudoku_border
+            if i == 8:
+                bottom-=sudoku_border
+            if j == 0:
+                left+=sudoku_border
+            if j == 8:
+                right-=sudoku_border
 
             point = [
                 [[left,  top]],
@@ -175,8 +188,10 @@ def build_sudoku(sudoku_image, test=False):
             square, _ = crop_from_points(edges, point)
 
             if test is True:
-                if i == 8 and j == 5:
+                if i == 0 and j == 3:
                     cv2.imshow('square', square)
+                if i == 1 and j == 0:
+                    cv2.imshow('ss', square)
 
             # Making the number fatter so it's easier to extract
             fat_square = square.copy()
@@ -261,6 +276,14 @@ class Sudoku:
                             continue
                         case.write(sudoku_image, number)
 
+    # For testing
+    def write_test(self, sudoku_image):
+        for i in range(9):
+            for j in range(9):
+                case = self.puzzle[i,j]
+                if case.number != 0:
+                    case.write(sudoku_image, str(case.number))
+
     def get_existing_numbers(self):
         existing_numbers = []
         for i in range(9):
@@ -283,7 +306,7 @@ class Sudoku:
         return string.strip()
 
     def solve_basic(self):
-        'Simply reads the numbers and finds a solution. Most reliable and safe choice.'
+        'Simply reads the numbers and finds a solution. Printed numbers will be less consistent.'
         string = self.as_string()
         if string in self.already_solved.keys():
             return self.already_solved[string]
@@ -298,45 +321,23 @@ class Sudoku:
             return self.already_solved[string], self.already_solved_numbers[string]
 
         else:
+            solved = sudoku_solving.solve(string)
             # If the sudoku is unsolvable but very similar to one we already did
             # we assume it's the same one but we couldn't quite catch some numbers
             # Approximate is percent-based, 90 = 90%
-            guesses = process.extract(string, self.already_solved.keys())
-            for already_solved, ratio in guesses:
-                if ratio > approximate:
-                    if test is True:
-                        print('fuzzed!', ratio)
-                        print(string, 'i see')
-                        print(already_solved, 'i think it is')
+            if solved is False:
+                guesses = process.extract(string, self.already_solved.keys())
+                for already_solved, ratio in guesses:
+                    if ratio > approximate:
+                        if test is True:
+                            print('fuzzed!', ratio)
+                            print(string, 'i see')
+                            print(already_solved, 'i think it is')
 
-                    bad_solved = False
+                        # if guess is string but with some 0s instead of numbers, continue
+                        return self.already_solved[already_solved], self.already_solved_numbers[already_solved]
 
-                    # We think this is it
-                    # But we have to check if we accidentally saved a bad read of the sudoku
-
-                    # WARNING NOTE this is not fool proof, there could be the case
-                    # where it thinks a 7 is a 1 and saves it as the correct sudoku
-
-                    # NOTE what we could do is base it on the % chance that the NN got it correct?
-                    # Maybe too complicated and cpu consuming just for this
-                    # Maybe just adjust the % that the NN needs to accept a number, so there's no errors.
-
-                    for i, already_s in enumerate(already_solved):
-                        # Take anything over 0
-                        if already_s == '0' and string[i] != '0':
-                            bad_solved = True
-                        # Take 0 over 1
-                        if already_s == '1' and string[i] == '0':
-                            bad_solved = True
-
-                    if bad_solved is True:
-                        self.already_solved.pop(already_solved)
-                        self.already_solved_numbers.pop(already_solved)
-                        continue
-                    # if guess is string but with some 0s instead of numbers, continue
-                    return self.already_solved[already_solved], self.already_solved_numbers[already_solved]
-
-            solved = sudoku_solving.solve(string)
+            # Only saves correct solutions
             if solved is not False:
                 # also save the numbers that already exist in the array
                 # (so we don't write over them if we can't see them)
@@ -348,10 +349,11 @@ class Sudoku:
         return False, False
 
 
-    def solve(self, img_cropped_sudoku, approximate=False):
+    def solve(self, img_cropped_sudoku, approximate=50):
         '''
-        Approximate=False for very reliable but image may blink in and out.
-        Approximate=70/80/90 for less reliable numbers in some cases but consistent image.
+        Approximate=False requires the NN to guess perfectly.
+        Approximate=0-99 tries to solve the sudoku,
+                    but if it fails it looks for a similar one that it already solved.
         '''
         if approximate is False:
             solution = self.solve_basic()
