@@ -1,2 +1,7 @@
+v0.2 TODO
+
+Make it so it only guesses the numbers every ~20 frames?
+Maybe guesses them really fast at the beginning and once it has it figured out it slows down
+
 Edit number positioning (in some positions they get weird and go to the corner of their cases)
 Make numbers less shaky
