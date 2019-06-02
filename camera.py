@@ -2,7 +2,7 @@ from __future__ import print_function
 import cv2
 
 from neural_network import NeuralNetwork
-from parse_image import sudoku_master
+from image_parsing import sudoku_master
 
 
 # Capture from camera 0
