@@ -131,7 +131,6 @@ class Sudoku:
 
         return False, False
 
-
     def solve(self, img_cropped_sudoku, approximate=False):
         '''
         If we don't find a solution to the sudoku (usually because of bad read)
