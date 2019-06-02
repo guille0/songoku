@@ -23,16 +23,16 @@ def sudoku_master(img_original):
         transformation_matrix = np.linalg.pinv(transformation_matrix)
 
         # We crop out each number from the sudoku and create a Sudoku instance
-        sudoku = build_sudoku(img_cropped_sudoku, test=True)
+        sudoku = build_sudoku(img_cropped_sudoku, test=False)
 
         # We pass the image of each case in the sudoku to a neural network to read
         ## NOTE: NUMBER READING THRESHOLD
         ## Minimum confidence the neural network needs to have about its guess (from 0 to 1)
-        sudoku.guess_sudoku(confidence_threshold=0.5)
+        sudoku.guess_sudoku(confidence_threshold=0)
 
         # Now that we have processed the sudoku, we can solve it with a normal sudoku algorithm
         # Also writes the results into the cropped sudoku
-        sudoku.solve(img_cropped_sudoku, approximate=False)
+        sudoku.solve(img_cropped_sudoku, approximate=0.8)
         # sudoku.write_test(img_cropped_sudoku)
 
         # We paste the cropped sudoku which is now solved into the camera image

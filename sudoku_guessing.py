@@ -102,23 +102,25 @@ class Sudoku:
                 # Saves this sudoku as false so we don't have to try to solve it every frame
                 self.already_solved_false.append(string)
 
-                guesses = process.extract(string, self.already_solved.keys())
-                # print(f'got {len(guesses)} guesses from {len(self.already_solved.keys())} keys')
-                if guesses:
+                if self.already_solved.keys():
 
-                    # Prioritizes length, then similarity to the guess
-                    if approximate is False:
-                        best = max(guesses, key=lambda x: (x[1], len(self.already_solved_numbers[x[0]])))[0]
-                        return self.already_solved[best], self.already_solved_numbers[best]
-                    else:
-                        sorty = sorted(guesses, key=lambda x: (len(self.already_solved_numbers[x[0]]), x[1]), reverse=True)
-                        for item in sorty:
-                            if item[1] > approximate:
-                                # Sort them by length and then get the one with biggest length that has addecuate ratio?
-                                return self.already_solved[item[0]], self.already_solved_numbers[item[0]]
-                        else:
+                    guesses = process.extract(string, self.already_solved.keys())
+
+                    if guesses:
+
+                        # Prioritizes length, then similarity to the guess
+                        if approximate is False:
                             best = max(guesses, key=lambda x: (x[1], len(self.already_solved_numbers[x[0]])))[0]
                             return self.already_solved[best], self.already_solved_numbers[best]
+                        else:
+                            sorty = sorted(guesses, key=lambda x: (len(self.already_solved_numbers[x[0]]), x[1]), reverse=True)
+                            for item in sorty:
+                                if item[1] > approximate:
+                                    # Sort them by length and then get the one with biggest length that has addecuate ratio?
+                                    return self.already_solved[item[0]], self.already_solved_numbers[item[0]]
+                            else:
+                                best = max(guesses, key=lambda x: (x[1], len(self.already_solved_numbers[x[0]])))[0]
+                                return self.already_solved[best], self.already_solved_numbers[best]
 
             # Only saves correct solutions
             if solved is not False:
@@ -154,7 +156,7 @@ class Case:
         self.image = None
         self.number = 0
         # NOTE: Edit capacity for bigger buffer?
-        self.prev_guesses = RingBuffer(capacity=10, dtype=(float, (10)))
+        self.prev_guesses = RingBuffer(capacity=5, dtype=(float, (10)))
 
         self.fontsize = 0
         self.case_position = (0, 0)
