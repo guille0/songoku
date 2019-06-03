@@ -32,7 +32,7 @@ def sudoku_master(img_original):
 
         # Now that we have processed the sudoku, we can solve it with a normal sudoku algorithm
         # Also writes the results into the cropped sudoku
-        sudoku.solve(img_cropped_sudoku, approximate=0.8)
+        sudoku.solve(img_cropped_sudoku, approximate=0.95)
         # sudoku.write_test(img_cropped_sudoku)
 
         # We paste the cropped sudoku which is now solved into the camera image
@@ -130,7 +130,7 @@ def build_sudoku(sudoku_image, test=False):
     # edges = cv2.dilate(edges, np.ones((2, 2)))
     # edges = cv2.morphologyEx(edges, cv2.MORPH_OPEN, np.ones((1,5),np.uint8))
     # edges = cv2.GaussianBlur(edges,(5,5),0)
-    # TODO 5,7 is normal V
+    # NOTE 5,7 is normal or 7,7 V
     edges = cv2.adaptiveThreshold(edges, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 7, 7)
 
     # Just a test, ignore

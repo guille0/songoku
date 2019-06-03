@@ -156,6 +156,7 @@ class Case:
         self.image = None
         self.number = 0
         # NOTE: Edit capacity for bigger buffer?
+        # With a bigger self.maxtimer we need a smaller buffer
         self.prev_guesses = RingBuffer(capacity=5, dtype=(float, (10)))
 
         self.fontsize = 0
@@ -163,6 +164,10 @@ class Case:
         self.physical_position = (0, 0)
 
         self.n = 0
+
+        # Guesses the number every self.maxtimer frames (10?), to not overuse resources
+        self.maxtimer = 10
+        self.timer = self.maxtimer-1
 
     def update(self, image, case_position, physical_position):
         self.image = image
@@ -204,12 +209,17 @@ class Case:
         if kind == 2:
             # Saves a bunch of guesses (see Case.__init__ for the number)
 
-            if self.image is None:
-                self.prev_guesses.appendleft(np.array([1,0,0,0,0,0,0,0,0,0]))
-            else:
-                guy = NeuralNetwork.instance()
-                prediction = guy.guess(self.image)
-                self.prev_guesses.appendleft(np.array(prediction))
+            # Guesses every self.maxtimer frames
+            self.timer += 1
+            if self.timer >= self.maxtimer:
+                self.timer = 0
+
+                if self.image is None:
+                    self.prev_guesses.appendleft(np.array([1,0,0,0,0,0,0,0,0,0]))
+                else:
+                    guy = NeuralNetwork.instance()
+                    prediction = guy.guess(self.image)
+                    self.prev_guesses.appendleft(np.array(prediction))
 
             m = np.mean(self.prev_guesses, axis=0)
             number = np.argmax(m, axis=0)
