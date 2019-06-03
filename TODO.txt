@@ -3,9 +3,9 @@ v0.2 TODO
 1.  Make it so it only guesses the numbers every ~20 frames?
     Maybe guesses them really fast at the beginning and once it has it figured out it slows down
 
-2.  Make numbers less shaky
+2.  Make numbers less shaky (better contour grabbing?)
 
 DONE:
 
-1.  It now guesses the numbers every 10 frames (though it still grabs every frame of video)
-2.  
+1.  Now guesses the numbers every 10 frames (though it still grabs every frame of video)
+
